@@ -2,22 +2,36 @@ require('dotenv').config();
 const TelegramBot = require('node-telegram-bot-api');
 
 const token = process.env.TELEGRAM_BOT;
-
 const bot = new TelegramBot(token, {polling: true});
 
-bot.onText(/\/lista (.+)/, (msg, match) => {
-  const chatId = msg.chat.id;
-  const resp = match[1];
-  const lista = ['ethereum', 'bitcoin', 'matic-network'];
+var answerCallbacks = [];
 
-  // send back the matched "whatever" to the chat
-  bot.sendMessage(chatId, 'ethereum, bitboin, matic-network');
+bot.on('message', (msg) => {
+  let callback = answerCallbacks[msg.chat.id];
+  if (callback) {
+    delete answerCallbacks[msg.chat.id];
+    callback(msg);
+  }
 });
 
-bot.onText(/\/new_alert (.+)/, (msg, match) => {  
-    const chaId = msg.chat.id;
+bot.onText(/\/new_alert/, async (msg) => {  
+    const chatId = msg.chat.id;
 
-    const array_text = match[1].split(' ');
-    console.log(array_text[0]);
-    console.log(array_text[1])
+    const opts = {
+      reply_to_message_id: msg.message_id,
+      reply_markup: {
+        "keyboard": [
+          [{ text: "Ethereum" }],
+          [{ text: "Bitcoin" }],
+          [{ text: "Matic" }]
+        ]        
+      }
+    };
+
+    bot.sendMessage(chatId, 'Sobre que coin quiere crear la alerta?', opts)
+    .then(() => {
+      answerCallbacks[chatId] = function(msg) {
+        bot.sendMessage(msg.chat.id, "Cual es el precio sobre el cual desea alertar sobre "+ msg.text + "?")
+      };
+    });
 });
