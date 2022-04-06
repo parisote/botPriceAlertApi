@@ -3,6 +3,7 @@ const axios = require('axios');
 const TelegramBot = require('node-telegram-bot-api');
 
 const token = process.env.TELEGRAM_BOT;
+const API = process.env.API;
 const bot = new TelegramBot(token, {polling: true});
 
 var answerCallbacks = [];
@@ -37,13 +38,19 @@ bot.onText(/\/new_alert/, async (msg) => {
         inline_keyboard: [[
             {
                 text: 'Ethereum',
-                callback_data: 'Ethereum'
+                callback_data: 'ethereum'
             }, {
                 text: 'Bitcoin',
-                callback_data: 'Bitcoin'
+                callback_data: 'bitcoin'
             }, {
                 text: 'Matic',
-                callback_data: 'Matic'
+                callback_data: 'matic-network'
+            }, {
+                text: 'Dot',
+                callback_data: 'matic-network'
+            }, {
+                text: 'Terra',
+                callback_data: 'matic-network'
             }
         ]]
       }
@@ -59,7 +66,7 @@ bot.on('callback_query', (callbackQuery) => {
 
   bot.sendMessage(message.chat.id, `Cual es el precio sobre el cual desea alertar sobre "${category}"?`)
   .then(() => answerCallbacks[message.chat.id] = async (msg) => {
-    axios.post('http://localhost:3000/api',{
+    axios.post(API,{
       coin: category,
       price: msg.text,
       who: msg.chat.id
