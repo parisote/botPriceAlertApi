@@ -66,16 +66,21 @@ bot.on('callback_query', (callbackQuery) => {
 
   bot.sendMessage(message.chat.id, `Cual es el precio sobre el cual desea alertar sobre "${category}"?`)
   .then(() => answerCallbacks[message.chat.id] = async (msg) => {
-    axios.post(API,{
-      coin: category,
-      price: msg.text,
-      who: msg.chat.id
-    })
-    .then(res => { 
-      bot.sendMessage(message.chat.id, "Alerta guardada correctamente");
-    })
-    .catch(error => {
-      console.log(error);
-    })
+    if(msg.text >= 0)
+      axios.post(API,{
+        coin: category,
+        price: msg.text,
+        who: msg.chat.id
+      })    
+      .then(res => { 
+        bot.sendMessage(message.chat.id, "Alerta guardada correctamente");
+      })
+      .catch(error => {
+        console.log(error);
+      })
+    else
+      bot.sendMessage(message.chat.id, "Error al guardar la alerta, el precio no puede ser menor a 0.");
   })
 });
+
+module.exports = { bot }; 
